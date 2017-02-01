@@ -1,5 +1,7 @@
 package com.patrickzhong.triangulus;
 
+import java.util.HashMap;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -8,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,11 +18,24 @@ import org.bukkit.util.Vector;
 
 public class Main extends JavaPlugin implements Listener {
 	
+	HashMap<Player, Triangle> triangles = new HashMap<Player, Triangle>();
+	
+	static Main instance;
 	
 	public void onEnable(){
 		this.getServer().getPluginManager().registerEvents(this, this);
+		
+		instance = this;
 	}
 	
+	public static Main getInstance(){
+		return instance;
+	}
+	
+	@EventHandler
+	public void onQuit(PlayerQuitEvent ev){
+		triangles.remove(ev.getPlayer());
+	}
 	
 	@EventHandler
 	public void onInteract(PlayerInteractEvent ev){
@@ -29,7 +45,22 @@ public class Main extends JavaPlugin implements Listener {
 			boolean outline = disp.length() > 16; // Triangulus: Bord|er
 			if(ev.getAction() == Action.LEFT_CLICK_BLOCK){
 				// Add vertex
-				ev.getPlayer().sendMessage(getLookingAt(ev.getPlayer(), ev.getClickedBlock()).toVector().toString());
+				Player player = ev.getPlayer();
+				Location loc = getLookingAt(player, ev.getClickedBlock());
+				
+				Triangle current = triangles.get(player);
+				if(current == null){
+					current = new Triangle();
+					triangles.put(player, current);
+				}
+				
+				if(current.addVertex(loc)){ // Shape completed
+					player.sendMessage(ChatColor.GRAY+"Triangulus created.");
+					current.draw();
+					triangles.remove(player);
+				}
+				else
+					player.sendMessage(ChatColor.GRAY+"Added new vertex.");
 			}
 			else if (ev.getAction() == Action.RIGHT_CLICK_BLOCK || ev.getAction() == Action.RIGHT_CLICK_AIR){
 				// Change mode
