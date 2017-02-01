@@ -18,18 +18,41 @@ public class Triangle {
 		return vertices.size() == numVerts;
 	}
 	
-	public void draw(){
+	public void draw(boolean outline){
 		final List<Location> parts = new ArrayList<Location>();
 		
-		for(int i = 0; i < numVerts; i++){
-			Location l1 = vertices.get(i); // Current vertex
-			Vector v1 = l1.toVector();
-			Vector v2 = vertices.get((i + 1) % numVerts).toVector(); // Next vertex
-			Vector vec = v2.subtract(v1); // Displacement vector
-			double length = vec.length();
-			vec = vec.normalize(); // Unit vector
-			for(double j = 0; j <= length; j += 0.1)
-				parts.add(vec.clone().multiply(j).add(v1).toLocation(l1.getWorld())); // Add particles in between
+		if(outline){
+			for(int i = 0; i < numVerts; i++){
+				Location l1 = vertices.get(i); // Current vertex
+				Location l2 = vertices.get((i + 1) % numVerts); // Next vertex
+				
+				addParts(l1, l2, parts);
+			}
+		}
+		else {
+			// WARNING: Works only for triangles at the moment.
+			
+			Location l1 = vertices.get(0);
+			Location l2 = vertices.get(1);
+			Location l3 = vertices.get(2);
+			
+			Vector v1 = l2.clone().subtract(l1).toVector();
+			Vector v2 = l2.clone().subtract(l3).toVector();
+			
+			double len1 = v1.length();
+			double len2 = v2.length();
+			
+			double step1 = 0.25; // Step size on side 1
+			double step2 = len2 / len1 * step1; // Step size on side 2
+			
+			v1 = v1.normalize();
+			v2 = v2.normalize();
+			
+			for(double i = 0; i < len1/step1; i ++){
+				Location start = l1.clone().add(v1.clone().multiply(i * step1));
+				Location end = l3.clone().add(v2.clone().multiply(i * step2));
+				addParts(start, end, parts); // Add particles between two sides
+			}
 		}
 		
 		new BukkitRunnable(){
@@ -38,6 +61,15 @@ public class Triangle {
 					NMS.spawnParticle(loc, Color.YELLOW);
 			}
 		}.runTaskTimer(Main.getInstance(), 0, 1);
+	}
+	
+	private void addParts(Location start, Location end, List<Location> parts){
+		Vector v1 = start.toVector();
+		Vector vec = end.toVector().subtract(v1); // Displacement vector
+		double length = vec.length();
+		vec = vec.normalize(); // Unit vector
+		for(double j = 0; j <= length; j += 0.25)
+			parts.add(vec.clone().multiply(j).add(v1).toLocation(start.getWorld())); // Add particles in between
 	}
 
 }

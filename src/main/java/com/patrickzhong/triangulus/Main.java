@@ -56,7 +56,7 @@ public class Main extends JavaPlugin implements Listener {
 				
 				if(current.addVertex(loc)){ // Shape completed
 					player.sendMessage(ChatColor.GRAY+"Triangulus created.");
-					current.draw();
+					current.draw(outline);
 					triangles.remove(player);
 				}
 				else
@@ -65,6 +65,7 @@ public class Main extends JavaPlugin implements Listener {
 			else if (ev.getAction() == Action.RIGHT_CLICK_BLOCK || ev.getAction() == Action.RIGHT_CLICK_AIR){
 				// Change mode
 				setDisp(ev.getItem(), "&b&lTriangulus: "+(outline ? "Fill" : "Border"));
+				triangles.remove(ev.getPlayer());
 				ev.getPlayer().updateInventory();
 			}
 		}
