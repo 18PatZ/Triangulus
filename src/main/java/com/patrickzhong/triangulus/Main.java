@@ -33,6 +33,8 @@ public class Main extends JavaPlugin implements Listener {
 		this.getServer().getPluginManager().registerEvents(this, this);
 		
 		instance = this;
+		
+		NMS.init(this);
 	}
 	
 	public static Main getInstance(){
