@@ -2,3 +2,11 @@ name: Triangulus
 main: com.patrickzhong.triangulus.Main
 version: 0.0.1
 author: ShowbizLocket61
+
+commands:
+  triclear:
+    description: Clear all your triangles.
+    usage: /<command>
+  triangulus:
+    description: Receive a gadget to select vertices.
+    usage: /<command>

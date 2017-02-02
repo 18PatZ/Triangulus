@@ -1,10 +1,15 @@
 package com.patrickzhong.triangulus;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,11 +19,13 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 public class Main extends JavaPlugin implements Listener {
 	
 	HashMap<Player, Triangle> triangles = new HashMap<Player, Triangle>();
+	HashMap<Player, List<BukkitTask>> tasks = new HashMap<Player, List<BukkitTask>>();
 	
 	static Main instance;
 	
@@ -36,6 +43,39 @@ public class Main extends JavaPlugin implements Listener {
 	public void onQuit(PlayerQuitEvent ev){
 		triangles.remove(ev.getPlayer());
 	}
+	
+	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
+		
+		if(!(sender instanceof Player)){
+			sender.sendMessage("You must be a player.");
+			return true;
+		}
+		
+		Player player = (Player) sender;
+		
+		if(cmd.getName().equalsIgnoreCase("triclear")){
+			
+			List<BukkitTask> ts = tasks.get(player);
+			if(ts != null)
+				for(int i = ts.size()-1; i >= 0; i--)
+					ts.remove(i).cancel();
+			
+			player.sendMessage(ChatColor.GRAY+"Triangles cleared.");
+		}
+		else if(cmd.getName().equalsIgnoreCase("triangulus")){
+			
+			ItemStack item = new ItemStack(Material.REDSTONE_COMPARATOR);
+			setDisp(item, "&b&lTriangulus: Border");
+			player.getInventory().addItem(item);
+			player.updateInventory();
+			player.sendMessage(ChatColor.GRAY+"Left-click to select vertices, right-click to change modes.");
+			
+		}
+		
+		return true;
+	}
+	
 	
 	@EventHandler
 	public void onInteract(PlayerInteractEvent ev){
@@ -55,8 +95,14 @@ public class Main extends JavaPlugin implements Listener {
 				}
 				
 				if(current.addVertex(loc)){ // Shape completed
+					List<BukkitTask> ts = tasks.get(player);
+					if(ts == null){
+						ts = new ArrayList<BukkitTask>();
+						tasks.put(player, ts);
+					}
+					ts.add(current.draw(outline));
+					
 					player.sendMessage(ChatColor.GRAY+"Triangulus created.");
-					current.draw(outline);
 					triangles.remove(player);
 				}
 				else

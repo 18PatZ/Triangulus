@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.bukkit.Location;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 public class Triangle {
@@ -19,7 +20,7 @@ public class Triangle {
 		return vertices.size() == numVerts;
 	}
 	
-	public void draw(boolean outline){
+	public BukkitTask draw(boolean outline){
 		final List<Location> parts = new ArrayList<Location>();
 		
 		if(outline){
@@ -62,7 +63,7 @@ public class Triangle {
 		for(int i = 0; i < 50; i++)
 			colors[i] = Color.getHSBColor(rand.nextFloat(), rand.nextFloat(), rand.nextFloat() * 0.2f + 0.8f);
 		
-		new BukkitRunnable(){
+		return new BukkitRunnable(){
 			
 			/*Color[] colors = {Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA, 
 					Color.BLACK, Color.GRAY, Color.WHITE, Color.PINK};*/
