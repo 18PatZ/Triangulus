@@ -3,6 +3,7 @@ package com.patrickzhong.triangulus;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Location;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -55,10 +56,37 @@ public class Triangle {
 			}
 		}
 		
+		// 50 random bright colors
+		final Color[] colors = new Color[50];
+		Random rand = new Random();
+		for(int i = 0; i < 50; i++)
+			colors[i] = Color.getHSBColor(rand.nextFloat(), rand.nextFloat(), rand.nextFloat() * 0.2f + 0.8f);
+		
 		new BukkitRunnable(){
+			
+			/*Color[] colors = {Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA, 
+					Color.BLACK, Color.GRAY, Color.WHITE, Color.PINK};*/
+			int counter = 0;
+			Color color = colors[0];
+			
+			Color target;
+			
 			public void run(){
+				
+				int period = 40;
+				if(counter % period == 0)
+					target = colors[counter/period % colors.length]; // Get next color
+				
+				int dr = target.getRed() - color.getRed();
+				int dg = target.getGreen() - color.getGreen();
+				int db = target.getBlue() - color.getBlue();
+				
+				color = new Color(color.getRed()+dr/10, color.getGreen()+dg/10, color.getBlue()+db/10); // Get intermetdiate color
+				
 				for(Location loc : parts)
-					NMS.spawnParticle(loc, Color.YELLOW);
+					NMS.spawnParticle(loc, color);
+				
+				counter++;
 			}
 		}.runTaskTimer(Main.getInstance(), 0, 1);
 	}

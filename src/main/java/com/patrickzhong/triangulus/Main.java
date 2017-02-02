@@ -75,13 +75,18 @@ public class Main extends JavaPlugin implements Listener {
 		Location pLoc = player.getEyeLocation();
 		Vector dir = pLoc.getDirection();
 		
-		for(double i = 0; i < 10; i += 0.1){ // Interate over the player direction vector
-			double x = dir.getX() * i + pLoc.getX(); // Current x position
-			double y = dir.getY() * i + pLoc.getY(); // Current y position
-			double z = dir.getZ() * i + pLoc.getZ(); // Current z position
+		double dx = dir.getX();
+		double dy = dir.getY();
+		double dz = dir.getZ();
+		
+		double step = 0.1;
+		for(double i = 0; i < 10; i += step){ // Interate over the player direction vector
+			double x = dx * i + pLoc.getX(); // Current x position
+			double y = dy * i + pLoc.getY(); // Current y position
+			double z = dz * i + pLoc.getZ(); // Current z position
 			Block b = player.getWorld().getBlockAt((int)Math.floor(x), (int)Math.floor(y), (int)Math.floor(z));
 			if(b.equals(block))
-				return new Location(player.getWorld(), x, y, z);
+				return new Location(player.getWorld(), x - dx*step, y - dy*step, z - dz*step);
 		}
 		
 		return block.getLocation();
